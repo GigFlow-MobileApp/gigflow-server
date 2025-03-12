@@ -1,6 +1,9 @@
 import secrets
 import warnings
+import os
 from typing import Annotated, Any, Literal
+from dotenv import load_dotenv
+from mysql.connector.opentelemetry.constants import FIRST_SUPPORTED_VERSION
 
 from pydantic import (
     AnyUrl,
@@ -14,6 +17,17 @@ from pydantic import (
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
+
+load_dotenv()
+PROJECT_NAME = os.getenv("PROJECT_NAME", "")
+POSTGRES_SERVER = os.getenv("POSTGRES_SERVER", "localhost")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", 5432)
+POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "gigflow")
+SECRET_KEY = os.getenv("SECRET_KEY", "")
+FIRST_SUPERUSER_PASSWORD = os.getenv("FIRST_SUPERUSER_PASSWORD", "")
+
 
 
 def parse_cors(v: Any) -> list[str] | str:
@@ -49,13 +63,15 @@ class Settings(BaseSettings):
             self.FRONTEND_HOST
         ]
 
-    PROJECT_NAME: str
+    PROJECT_NAME: str = PROJECT_NAME
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
-    POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
+    POSTGRES_SERVER: str = POSTGRES_SERVER
+    POSTGRES_PORT: int = POSTGRES_PORT
+    POSTGRES_USER: str = POSTGRES_USER
+    POSTGRES_PASSWORD: str = POSTGRES_PASSWORD
+    POSTGRES_DB: str = POSTGRES_DB
+    SECRET_KEY: str = SECRET_KEY
+    FIRST_SUPERUSER_PASSWORD: str = FIRST_SUPERUSER_PASSWORD
 
     @computed_field  # type: ignore[prop-decorator]
     @property

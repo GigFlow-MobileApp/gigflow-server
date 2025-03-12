@@ -1,4 +1,5 @@
 import uuid
+from typing import List
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -10,6 +11,19 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    recipient_name: str | None = Field(default=None, max_length=255)
+    street: str | None = Field(default=None, max_length=255)
+    city: str | None = Field(default=None, max_length=255)
+    state: str | None = Field(default=None, max_length=255)
+    zipcode: str | None = Field(default=None, max_length=255)
+    balance: float | None = Field(default=0.0)
+    preference: int | None = Field(default=0)
+    badge: int | None = Field(default=None, nullable=True)
+    account_uberid: str | None = Field(default=None, max_length=255)
+    account_lyftid: str | None = Field(default=None, max_length=255)
+    account_doordashid: str | None = Field(default=None, max_length=255)
+    account_upworkid: str | None = Field(default=None, max_length=255)
+    account_fiverrid: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on creation
@@ -20,7 +34,6 @@ class UserCreate(UserBase):
 class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
-    full_name: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on update, all are optional
@@ -32,6 +45,11 @@ class UserUpdate(UserBase):
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
+    recipient_name: str | None = Field(default=None, max_length=255)
+    street: str | None = Field(default=None, max_length=255)
+    city: str | None = Field(default=None, max_length=255)
+    state: str | None = Field(default=None, max_length=255)
+    zipcode: str | None = Field(default=None, max_length=255)
 
 
 class UpdatePassword(SQLModel):
