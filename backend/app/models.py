@@ -1,9 +1,14 @@
 import uuid
+from datetime import datetime
+from enum import Enum
 from typing import List
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
+##
+#---------------------------------------- User Model -------------------------------------------
+##
 
 # Shared properties
 class UserBase(SQLModel):
@@ -62,6 +67,7 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    accounts: list["Account"] = Relationship(back_populates="user", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -73,6 +79,10 @@ class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
 
+
+##
+#---------------------------------------- Item Model -------------------------------------------
+##
 
 # Shared properties
 class ItemBase(SQLModel):
@@ -130,3 +140,63 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+##
+#---------------------------------------- Account Model -------------------------------------------
+##
+
+class AccountType(str, Enum):
+    NONE = "none"
+    UBER = "uber"
+    LYFT = "lyft"
+    DOORDASH = "doordash"
+    UPWORK = "upwork"
+    FIVERR = "fiverr"
+
+
+# Shared properties
+class AccountBase(SQLModel):
+    type: AccountType = Field(default=AccountType.NONE)
+    balance: float = Field(default=0.0)
+    token: str | None = Field(default=None, max_length=255)
+    is_active: bool = Field(default=True)
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    description: str | None = Field(default=None, max_length=255)
+    user_id: str | None = Field(default=None, max_length=255)
+
+
+# Properties to receive on account creation
+class AccountCreate(AccountBase):
+    pass
+
+
+# Properties to receive on account update
+class AccountUpdate(SQLModel):
+    type: AccountType | None = None
+    balance: float | None = None
+    token: str | None = Field(default=None, max_length=255)
+    is_active: bool | None = None
+    description: str | None = Field(default=None, max_length=255)
+    user_id: uuid.UUID = Field(default=None, max_length=255)
+
+# Database model
+class Account(AccountBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+    user: User = Relationship(back_populates="accounts")
+
+
+# Properties to return via API
+class AccountPublic(AccountBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+
+
+class AccountsPublic(SQLModel):
+    data: list[AccountPublic]
+    count: int
+
+
+class AccountBalance(SQLModel):
+    balance: float
+    last_updated: datetime

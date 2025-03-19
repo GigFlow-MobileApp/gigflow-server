@@ -4,7 +4,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, Account, AccountCreate, AccountUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -52,3 +52,45 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def create_account(*, session: Session, account_in: AccountCreate, user_id: uuid.UUID) -> Account:
+    db_account = Account.model_validate(account_in, update={"user_id": user_id})
+    session.add(db_account)
+    session.commit()
+    session.refresh(db_account)
+    return db_account
+
+
+def get_account(*, session: Session, account_id: uuid.UUID) -> Account | None:
+    return session.get(Account, account_id)
+
+
+def get_accounts_by_user(
+    *, session: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 100
+) -> list[Account]:
+    statement = (
+        select(Account)
+        .where(Account.user_id == user_id)
+        .offset(skip)
+        .limit(limit)
+    )
+    return session.exec(statement).all()
+
+
+def update_account(
+    *, session: Session, db_account: Account, account_in: AccountUpdate
+) -> Account:
+    update_data = account_in.model_dump(exclude_unset=True)
+    db_account.sqlmodel_update(update_data)
+    session.add(db_account)
+    session.commit()
+    session.refresh(db_account)
+    return db_account
+
+
+def delete_account(*, session: Session, account_id: uuid.UUID) -> None:
+    account = session.get(Account, account_id)
+    if account:
+        session.delete(account)
+        session.commit()
