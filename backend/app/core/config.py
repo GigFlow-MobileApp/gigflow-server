@@ -19,7 +19,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
 load_dotenv()
-PROJECT_NAME = os.getenv("PROJECT_NAME", "")
+PROJECT_NAME = os.getenv("PROJECT_NAME", "GigFlow")
 POSTGRES_SERVER = os.getenv("POSTGRES_SERVER", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", 5432)
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
@@ -130,6 +130,16 @@ class Settings(BaseSettings):
         )
 
         return self
+
+    # Uber OAuth settings
+    UBER_CLIENT_ID: str = ""
+    UBER_CLIENT_SECRET: str = ""
+    UBER_REDIRECT_URI: str = "http://your-domain/uber/callback"
+
+    # Lyft OAuth settings
+    LYFT_CLIENT_ID: str = ""
+    LYFT_CLIENT_SECRET: str = ""
+    LYFT_REDIRECT_URI: str = "http://your-domain/lyft/callback"
 
 
 settings = Settings()  # type: ignore

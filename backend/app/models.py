@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List
 
-from pydantic import EmailStr
+from pydantic import EmailStr, BaseModel
 from sqlmodel import Field, Relationship, SQLModel
 
 ##
@@ -163,6 +163,7 @@ class AccountBase(SQLModel):
     last_updated: datetime = Field(default_factory=datetime.utcnow)
     description: str | None = Field(default=None, max_length=255)
     user_id: str | None = Field(default=None, max_length=255)
+    connection_status: bool = Field(default=False)
 
 
 # Properties to receive on account creation
@@ -178,6 +179,7 @@ class AccountUpdate(SQLModel):
     is_active: bool | None = None
     description: str | None = Field(default=None, max_length=255)
     user_id: uuid.UUID = Field(default=None, max_length=255)
+    connection_status: bool = Field(default=False)
 
 # Database model
 class Account(AccountBase, table=True):
@@ -200,3 +202,25 @@ class AccountsPublic(SQLModel):
 class AccountBalance(SQLModel):
     balance: float
     last_updated: datetime
+
+class UberOAuthResponse(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
+    refresh_token: str
+    scope: str
+
+class UberAccountConnect(BaseModel):
+    code: str
+    state: str
+
+class LyftOAuthResponse(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
+    refresh_token: str
+    scope: str
+
+class LyftAccountConnect(BaseModel):
+    code: str
+    state: str
